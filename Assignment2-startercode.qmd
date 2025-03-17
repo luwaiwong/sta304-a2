@@ -20,29 +20,106 @@ web_data <- read_csv("ces_web.csv")
 
 # 1 Introduction
 
-hello
-
 In this section you will briefly describe your report. Explain the importance of the subsequent analysis and prepare the reader for what they will read in the subsequent sections. Provide an overview of the research question. Briefly describe the 2019 Canadian Federal Election Study and its relevance. State the purpose and goals/hypotheses of the report.
 
 # 2 Data
 
 Briefly introduce the data and key variables of interest. If you do any general data cleaning or data processing you should describe it (in a reproducible manner) here. Identify the stratification variable used. Include at least one plot displaying the distribution of the strata variable. If you do any data cleaning or data processing to the you should describe it (in a reproducible manner) in this section.
 
+Our two sources of data used different formats for column names, as well as result names. In order to make it easier to read the data, as well as to make comparisons easier, columns for both datasets are renamed and standardised to:
+
+-   Gender
+-   Age
+-   Province
+-   Education
+-   Political Interest
+-   Vote Certainty
+-   Vote Choice
+
+Options for those columns are also standardized into the same format. For example, with the options for Gender renamed to "Male", "Female", or "Other"
+
+Standardization of data and columns names was done with assistance with Generative AI (Claude 3.5 Sonnet, <https://claude.ai/chat/81e69346-0b7c-448a-8e82-e8450b894d18>)
+
 ```{r, include = FALSE}
+# Cleaning Variable Data & Updating Labels
+## Web Data
+web_data <- web_data %>%
+  mutate(
+    province = case_when(
+      cps19_province == 14 ~ "Alberta",
+      cps19_province == 15 ~ "British Columbia",
+      cps19_province == 16 ~ "Manitoba",
+      cps19_province == 17 ~ "New Brunswick",
+      cps19_province == 18 ~ "Newfoundland & Labrador",
+      cps19_province == 19 ~ "Northwest Territories",
+      cps19_province == 20 ~ "Nova Scotia",
+      cps19_province == 21 ~ "Nunavut",
+      cps19_province == 22 ~ "Ontario",
+      cps19_province == 23 ~ "Prince Edward Island",
+      cps19_province == 24 ~ "Quebec",
+      cps19_province == 25 ~ "Saskatchewan",
+      cps19_province == 26 ~ "Yukon",
+      TRUE ~ NA_character_
+    ),
+    # Education standardization
+    education = case_when(
+      cps19_education == 1 ~ "No schooling",
+      cps19_education == 2 ~ "Some elementary school",
+      cps19_education == 3 ~ "Completed elementary school",
+      cps19_education == 4 ~ "Some secondary/high school",
+      cps19_education == 5 ~ "Completed secondary/high school",
+      cps19_education == 6 ~ "Some technical, community college",
+      cps19_education == 7 ~ "Completed technical, community college",
+      cps19_education == 8 ~ "Some university",
+      cps19_education == 9 ~ "Bachelor's degree",
+      cps19_education == 10 ~ "Master's degree",
+      cps19_education == 11 ~ "Professional degree or doctorate",
+      cps19_education == 12 ~ NA_character_,
+      TRUE ~ NA_character_
+    ),   
+    # Vote certainty standardization
+    vote_certainty = case_when(
+      cps19_v_likely == 1 ~ "Certain",
+      cps19_v_likely == 2 ~ "Likely",
+      cps19_v_likely == 3 ~ "Unlikely",
+      cps19_v_likely == 4 ~ "Certain to not vote",
+      cps19_v_likely == 5 ~ "Not eligible",
+      cps19_v_likely == 6 ~ NA_character_,
+      cps19_v_likely == 7 ~ "Voted in advance",
+      TRUE ~ NA_character_
+    ),
+    # Age
+    age = cps19_yob,
+    # Gender
+    gender = cps19_gender,
+    # Vote choice standardization
+    vote_choice = case_when(
+      cps19_votechoice == 1 ~ "Liberal",
+      cps19_votechoice == 2 ~ "Conservative",
+      cps19_votechoice == 3 ~ "NDP",
+      cps19_votechoice == 4 ~ "Bloc Quebec",
+      cps19_votechoice == 5 ~ "Green Party",
+      cps19_votechoice == 6 ~ "People's Party",
+      cps19_votechoice == 7 ~ "Other",
+      cps19_votechoice == 9 ~ NA_character_,
+      TRUE ~ NA_character_
+    )
+  )
 
-# Here you can clean the data. 
 
-# You may need additional chunks, in case you want to include some of the cleaning output.
-
-# For example, maybe I want to look at gender, and I want to update the labels of the gender variable in the phone data, to match the web data.
-
-phone_data <- 
-  phone_data %>% 
-  mutate(gender = case_when(q3==1 ~ "Man",
-                            q3==2 ~ "Woman",
-                            q3==3 ~ "Other")) 
-
+# Cleaning Data & Renaming Columns
+web_data <- web_data %>% rename(
+#  gender = cps19_gender,
+#  age = cps19_yob,
+#  provnice = cps19_province,
+#  education = cps19_education,
+  interest = cps19_interest_elxn_1,    
+#  vote_certainty = cps19_v_likely,
+#  vote_choice = cps19_votechoice
+)
 ```
+
+# 
 
 Be sure to have text describing any plots or tables included.
 
