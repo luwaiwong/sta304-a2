@@ -20,6 +20,8 @@ web_data <- read_csv("ces_web.csv")
 
 # 1 Introduction
 
+hello
+
 In this section you will briefly describe your report. Explain the importance of the subsequent analysis and prepare the reader for what they will read in the subsequent sections. Provide an overview of the research question. Briefly describe the 2019 Canadian Federal Election Study and its relevance. State the purpose and goals/hypotheses of the report.
 
 # 2 Data
@@ -77,7 +79,7 @@ Present a table showing the estimated proportion of votes for the selected party
 In Table 1 I present both confidence intervals of....
 
 |   | Proportion of Outcome Variable | 95% Confidence Interval of Outcome Variable |
-|----|----|----|
+|------------------------|------------------------|------------------------|
 | Phone Survey | 0.34 | (lower bound, upper bound) |
 | Web Survey | 0.25 | (lower bound, upper bound) |
 
