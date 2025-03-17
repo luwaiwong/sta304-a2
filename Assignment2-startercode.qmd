@@ -1,0 +1,124 @@
+---
+title: "ADD IN MEANINGFUL TITLE HERE"
+author: "GROUP NUMBER: ADD YOUR NAMES HERE"
+subtitle: "STA304 - Winter 2025 - Assignment 2"
+format: pdf
+editor: visual
+---
+
+```{r, include = FALSE}
+
+# Here you can load in and clean the data (you may need to do the cleaning in a separate R script - this is up to you). 
+library(tidyverse)
+
+phone_data <- read_csv("ces_phone.csv")
+web_data <- read_csv("ces_web.csv")
+
+# You may need additional chunks, in case you want to include some of the cleaning output.
+
+```
+
+# 1 Introduction
+
+In this section you will briefly describe your report. Explain the importance of the subsequent analysis and prepare the reader for what they will read in the subsequent sections. Provide an overview of the research question. Briefly describe the 2019 Canadian Federal Election Study and its relevance. State the purpose and goals/hypotheses of the report.
+
+# 2 Data
+
+Briefly introduce the data and key variables of interest. If you do any general data cleaning or data processing you should describe it (in a reproducible manner) here. Identify the stratification variable used. Include at least one plot displaying the distribution of the strata variable. If you do any data cleaning or data processing to the you should describe it (in a reproducible manner) in this section.
+
+```{r, include = FALSE}
+
+# Here you can clean the data. 
+
+# You may need additional chunks, in case you want to include some of the cleaning output.
+
+# For example, maybe I want to look at gender, and I want to update the labels of the gender variable in the phone data, to match the web data.
+
+phone_data <- 
+  phone_data %>% 
+  mutate(gender = case_when(q3==1 ~ "Man",
+                            q3==2 ~ "Woman",
+                            q3==3 ~ "Other")) 
+
+```
+
+Be sure to have text describing any plots or tables included.
+
+```{r, echo = FALSE}
+
+# Use this to create your plots/visualization. 
+
+hist(phone_data$q3) 
+
+```
+
+# 3 Methods
+
+Include the formula for calculating the confidence interval for proportions (do not include specific numbers yet) and provide a description of its components. Present the logistic regression model, specifying the independent variables and expected interpretation of coefficients (parameters, not estimates), and describe the model. In this section you are preparing the reader for how to interpret the numbers displayed in the next section (Results).
+
+Be sure to include your CI formula, and a description of the components of the formula.
+
+$$\bar{X} \pm \chi_{\alpha/2} \sqrt{\frac{1+1}{n}}$$
+
+Be sure to include your logistic regression model, and a description of the components of the model.
+
+$$y = mx+ b$$
+
+# 4 Results
+
+Present a table showing the estimated proportion of votes for the selected party along with the 95% confidence interval, and include text describing this table and the key takeaways.
+
+```{r, include = FALSE}
+
+# Here you can run code to calculate your Confidence Intervals.
+
+```
+
+In Table 1 I present both confidence intervals of....
+
+|   | Proportion of Outcome Variable | 95% Confidence Interval of Outcome Variable |
+|----|----|----|
+| Phone Survey | 0.34 | (lower bound, upper bound) |
+| Web Survey | 0.25 | (lower bound, upper bound) |
+
+: The proportions and 95% confidence intervals of outcome variable of interest calculated for both the Canadian Election Study 2019 phone and web survey data.
+
+Provide a table or formula of the estimated logistic regression model, and include text describing this table/formula and the key takeaways. Interpret the estimates from the logistic regression model. Specifically, commenting on how the predictor variables relate to the outcome variable.
+
+Below is the estimate regression model....
+
+$$
+\hat{y} = 18x+3
+$$
+
+# 5 Discussion
+
+Summarize key findings. Discuss limitations of the analysis (e.g., potential biases, missing variables, survey errors). Provide recommendations for future research or improvements.
+
+# 6 Generative AI Statement
+
+Here is where you can explain your usage of Generative AI tool(s). Be sure to reference any tools with inline citations.
+
+Alternatively, if you did not use Generative AI, please include a brief statement outlining your workflow for completing this assignment.
+
+# 7 Ethics Statement
+
+Explain how you ensured that your analysis is reproducible (e.g., documenting code, using proper statistical methods).
+
+Since the CES 2019 data is publicly available, describe whether or not this the work completed in your report needs Research Ethics Board approval for the report the be made publicly available. Be sure to specifically discuss the privacy of human participants in this study.
+
+\newpage
+
+# 8 Bibliography
+
+1.  Grolemund, G. (2014, July 16) *Introduction to R Markdown*. RStudio. <https://rmarkdown.rstudio.com/articles_intro.html>. (Last Accessed: April 4, 1991)
+
+2.  Dekking, F. M., et al. (2005) *A Modern Introduction to Probability and Statistics: Understanding why and how.* Springer Science & Business Media.
+
+3.  Allaire, J.J., et. el. *References: Introduction to R Markdown*. RStudio. <https://rmarkdown.rstudio.com/docs/>. (Last Accessed: April 4, 1991)
+
+\newpage
+
+# 9 Appendix
+
+Any additional notes/derivations that are supplementary to the report can be added in an appendix. This section will not be directly graded, but may be included for completion-sake.
