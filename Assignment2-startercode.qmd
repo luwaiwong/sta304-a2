@@ -6,6 +6,10 @@ format: pdf
 editor: visual
 ---
 
+
+hello
+---
+
 ```{r, include = FALSE}
 
 # Here you can load in and clean the data (you may need to do the cleaning in a separate R script - this is up to you). 
@@ -76,10 +80,10 @@ Present a table showing the estimated proportion of votes for the selected party
 
 In Table 1 I present both confidence intervals of....
 
-|   | Proportion of Outcome Variable | 95% Confidence Interval of Outcome Variable |
-|----|----|----|
-| Phone Survey | 0.34 | (lower bound, upper bound) |
-| Web Survey | 0.25 | (lower bound, upper bound) |
+|              | Proportion of Outcome Variable | 95% Confidence Interval of Outcome Variable |
+|------------------------|------------------------|------------------------|
+| Phone Survey | 0.34                           | (lower bound, upper bound)                  |
+| Web Survey   | 0.25                           | (lower bound, upper bound)                  |
 
 : The proportions and 95% confidence intervals of outcome variable of interest calculated for both the Canadian Election Study 2019 phone and web survey data.
 
