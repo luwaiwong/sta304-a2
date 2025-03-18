@@ -1,0 +1,303 @@
+---
+title: "Survey Package and Regression"
+author: ""
+date: "February 25, 2025 "
+output: pdf_document
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Let's work through the following R code:
+
+```{r}
+library(tidyverse)
+```
+
+# Loading in Data
+
+The `dpylr` package has some data about Star Wars characters. Let's
+assume it is a representative sample of all characters seen in Episodes
+1 to 9.
+
+```{r, message=FALSE}
+
+starwars<-starwars
+
+glimpse(starwars)
+
+head(starwars)
+
+```
+
+We will be working with `mass`, and `height` throughout this class, so
+let's remove the NAs. Additionally, we will be working with `species`,
+let's categorize species to be `human`, \`droid\` or `other`.
+
+```{r}
+summary(starwars$mass)
+summary(starwars$height)
+table(starwars$species)
+
+starwars_clean <- starwars %>% 
+  filter(!is.na(mass)) %>% 
+  filter(!is.na(height)) %>%
+  mutate(species_clean = case_when(
+    species == "Human" ~ "human",
+    species == "Droid" ~ "droid",
+    species != "Human" & species != "Droid" ~ "other")) %>% 
+  filter(!is.na(species_clean))
+
+starwars_clean 
+
+n=nrow(starwars_clean)
+```
+
+### Task 1: Create a Simple Linear Model to predict mass
+
+Use the `svyglm()` function in the `survey` library to run a linear
+regression estimation of mass given height. Assume it was a Simple
+Random Sample and use the finite population correction with $N=224$.
+
+```{r}
+library(survey)
+
+N=224
+n=nrow(starwars_clean)
+
+fpc.srs = rep(N, n)
+
+starwars.design <- svydesign(id=~1, data=starwars_clean, fpc=fpc.srs)
+
+mysvylm <- svyglm(mass ~ height, starwars.design)
+summary(mysvylm)
+```
+
+What is the model in this example?
+
+$$y_{mass} = \beta_0 + \beta_1 x_{height} + \epsilon$$
+
+This is a "simple linear regression" model (because there is only one
+numeric $x$ variable).
+
+What is the estimate of the model?
+
+$$\hat{y}_{mass} = \hat{\beta_0} + \hat{\beta_1} x_{height}$$
+$$\hat{y}_{mass} = -11.25 + 0.63 x_{height}$$
+
+### Task 2: Create a Linear Model to predict mass
+
+Use the `lm()` function to run a linear regression estimation of mass
+given height.
+
+```{r}
+## Using the Survey Library
+summary(lm(mass ~ height, data=starwars_clean))
+
+```
+
+What is the model in this example?
+
+$$y_{mass} = \beta_0 + \beta_1 x_{height} + \epsilon$$ This is a "simple
+linear regression" model (because there is only one numeric $x$
+variable).
+
+What is the estimate of the model?
+
+$$\hat{y}_{mass} = \hat{\beta_0} + \hat{\beta_1} x_{height}$$
+$$\hat{y}_{mass} = -11.25 + 0.63 x_{height}$$
+
+What is the different between the output here and the outcome in Task 1?
+What is similar?
+
+**Standard errors are different, but estimates are the same.**
+
+What happens if you change the $N$ in Task 1? Try setting
+$N=87, 224, 1000$
+
+### Task 3: Create a Linear Model to predict mass
+
+Run a linear regression estimation of mass given height and species.
+
+```{r}
+## Using the Survey Library
+fpc.srs = rep(N, n)
+
+starwars.design <- svydesign(id=~1, data=starwars_clean, fpc=fpc.srs)
+
+mysvylm <- svyglm(mass ~ height + species_clean, starwars.design)
+summary(mysvylm) ### SRS
+
+## Using lm
+mymodel<-lm(mass ~ height + species_clean, data=starwars_clean)
+summary(mymodel) ## TAUGHT IN STA302
+
+```
+
+What is the model in this example?
+
+$$y_{mass} = \beta_0 + \beta_1 x_{height} + \beta_2x_{human} + \beta_3x_{other} + \epsilon$$
+This is a "multiple linear regression" model (because there is are two
+(more than 1) predictor $x$ variables).
+
+What is the estimate of the model?
+
+$$\hat{y}_{mass} = \hat{\beta_0} + \hat{\beta_1} x_{height} + \hat{ \beta_2}x_{human} + \hat{\beta_3}x_{other}$$
+$$\hat{y}_{mass} = -21.38 + 0.65 x_{height} -14.64x_{human} + 20.18x_{other}$$
+Note, the variables $x_{human}$ and $x_{other}$ are "dummy" variables.
+They are coded such that they indicate whether or not the character is
+in that species category.
+
+Based on the output, what is the estimated mass of a human character who
+is 175 units tall?
+
+```{r}
+-21.3802493 + 0.6509304 *175 - 14.6399467*1 +20.1821107*0
+predict(mysvylm, tibble(height=175, species_clean="human"))
+predict(mymodel, tibble(height=175, species_clean="human"))
+```
+
+Based on the output, what is the estimated mass of a droid character who
+is 175 units tall?
+
+```{r}
+-21.3802493 + 0.6509304 *175 - 14.6399467*0 +20.1821107*0
+predict(mysvylm, tibble(height=175, species_clean="droid"))
+predict(mymodel, tibble(height=175, species_clean="droid"))
+```
+
+What is the expected difference in the mass of a human vs a droid
+character of the same height?
+
+```         
+77.89262-92.53256 = -14.63994
+```
+
+We expect human characters to have a mass of 14.64 units lower than
+droid characters of the same height.
+
+### Task 4: Create a Logistic Regression Model to predict if mass exceeds 100lb.
+
+Run a logistic regression model mass being over 100lbs given height and
+species.
+
+```{r}
+
+## Create a new variable called `mass_over100`. 
+
+starwars_clean <- starwars_clean %>%  mutate(
+  mass_over100 = case_when(
+    mass > 100 ~ 1, ## 1 = Yes, over 100lbs
+    mass <= 100 ~ 0))
+
+
+## Using lm
+my_glm <- glm(mass_over100 ~ height + species_clean, 
+              data=starwars_clean, 
+              family = "binomial")
+summary(my_glm)
+
+```
+
+What is the model in this example? (A2 - # 3 Methods)
+
+$$log(\frac{p}{1-p}) = \beta_0 + \beta_1 x_{height} + \beta_2x_{human} + \beta_3x_{other}$$
+
+What is the estimate of the model? (A2 - # 4 Results)
+
+$$log\Big(\frac{\hat{p}}{1-\hat{p}}\Big) = \hat{\beta_0} + \hat{\beta_1} x_{height} + \hat{ \beta_2}x_{human} + \hat{\beta_3}x_{other}$$
+$$log\Big(\frac{\hat{p}}{1-\hat{p}}\Big) = -11.45 + 0.06 x_{height} -2.14x_{human} -2.04 x_{other}$$
+
+Based off the above output, what is the predicted probability of a human
+who is 175cm tall being over 100lbs?
+
+```{r}
+pred_odds <- -11.45547800 + 0.06230662*175 -2.14452294*1 -2.04236670*0 
+exp(pred_odds)/(1+exp(pred_odds))
+
+pred_odds2 <- predict(my_glm, tibble(species_clean="human", height=175))
+exp(pred_odds2)/(1+exp(pred_odds2))
+
+pred_prob <- predict(my_glm, tibble(species_clean="human", height=175), type = "response")
+pred_prob
+```
+
+```{r}
+starwars.design <- svydesign(id=~1, data=starwars_clean, fpc=fpc.srs)
+
+mysvyglm <- svyglm(mass_over100 ~ height + species_clean, 
+              family = "binomial", starwars.design)
+
+summary(mysvyglm)
+```
+
+### Task 5: Create a logistic regression for Stratified Random Sampling (A2)
+
+For the starwars data, let’s assume the study instead collected the data
+by stratifying by species, where in the population there 16 droids, 80
+humans and 128 other species. Use the finite population correction with
+N=224 to estimate.
+
+Run a logistic regression model mass being over 100lbs given height and
+species.
+
+```{r}
+table(starwars_clean$species_clean) # Sample strata sizes (ni's) are 4, 20, 32, total sample size (n) = 4 + 20 + 32 = 56
+
+starwars_clean <- starwars_clean %>% 
+  mutate(pop_fpc = case_when(species_clean=="droid" ~ 16,         # Population strata sizes (Ni's) are 16, 80, 128
+                             species_clean=="human" ~ 80,         # Total population size (N) = 16 + 80 + 128 = 224
+                             species_clean=="other" ~ 128)) %>% 
+  mutate(samp_wt = case_when(species_clean=="droid" ~ 16/4,       # Sampling weights (samp_wt) are calculated as Ni/ni
+                             species_clean=="human" ~ 80/20,     
+                             species_clean=="other" ~ 128/32))
+
+
+strata.design <- svydesign(id=~1,
+                       strata=~species_clean,
+                       weights = ~samp_wt, 
+                       fpc=~pop_fpc,
+                       data=starwars_clean)
+
+mysvyglm <- svyglm(mass_over100 ~ height + species_clean, 
+              family = "binomial", strata.design)
+
+summary(mysvyglm)
+```
+
+\newpage
+
+# Logistic Regression UCLA analysis of SRS with population of N=6000 code
+
+```{r}
+mydata <- read.csv("https://stats.idre.ucla.edu/stat/data/binary.csv")
+
+## Standard Logistic Regression
+mylogit<-glm(admit ~ gre + gpa +
+               as.factor(rank), data=mydata, family="binomial")
+summary(mylogit)
+
+## log(p/(1-p)) = -3.99 + 0.002*gre + 0.804*gpa-0.675*x3
+##                           -1.34*x4 - 1.55*x5
+
+
+## Survey Estimation for Logistic Regression
+n=length(mydata$admit)
+N=6000
+
+#install.packages("survey")
+library(survey)
+## Using the Survey Library
+fpc.srs = rep(N, n)
+
+ucla.design <- svydesign(id=~1, data=mydata, fpc=fpc.srs)
+
+mysvyglm <- svyglm(admit ~ gre + gpa + as.factor(rank), 
+                   ucla.design, family="binomial")
+summary(mysvyglm)
+
+```
