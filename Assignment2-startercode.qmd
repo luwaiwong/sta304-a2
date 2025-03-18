@@ -111,13 +111,21 @@ ggplot(web_data, aes(x = gender)) +
 
 Include the formula for calculating the confidence interval for proportions (do not include specific numbers yet) and provide a description of its components. Present the logistic regression model, specifying the independent variables and expected interpretation of coefficients (parameters, not estimates), and describe the model. In this section you are preparing the reader for how to interpret the numbers displayed in the next section (Results).
 
-Be sure to include your CI formula, and a description of the components of the formula.
+Be sure to include your CI formula, and a description of the components of the formula. (somebody describe it)
 
 $$\bar{X} \pm \chi_{\alpha/2} \sqrt{\frac{1+1}{n}}$$
 
-Be sure to include your logistic regression model, and a description of the components of the model.
+Our logistic regression model for predicting the log odds of voting for the Liberal party is described mathematically as below:
 
-$$y = mx+ b$$
+$$log(\frac{p}{1-p}) = \beta_0 + \beta_1 x_{male} + \beta_2x_{female} + \beta_3x_{age}$$
+
+Independent variables for the model are:
+
+-   Male: Is 0 if the voter is not male, 1 if the voter is male. Describes the log odds of someone voting Liberal, if they are male
+
+-   Female: Is 0 if the voter is not female, 1 if the voter is female. Describes the log odds of someone voting Liberal, if they are female
+
+-   Age: Describes the age of the voter. Describes the change in log odds of someone voting Liberal, as their age increases
 
 # 4 Results
 
