@@ -24,74 +24,47 @@ In this section you will briefly describe your report. Explain the importance of
 
 # 2 Data
 
-Briefly introduce the data and key variables of interest. If you do any general data cleaning or data processing you should describe it (in a reproducible manner) here. Identify the stratification variable used. Include at least one plot displaying the distribution of the strata variable. If you do any data cleaning or data processing to the you should describe it (in a reproducible manner) in this section.
+Our data will be based upon the web survey from the 2019 Canadian Federal Election Study. The key variables of interest for this report are gender, age, and vote choice. Gender will be used as the stratification variable, and age will be used in conjunction to predict the log odds of voting for the Liberal party.
 
-Our two sources of data used different formats for column names, as well as result names. In order to make it easier to read the data, as well as to make comparisons easier, columns for both datasets are renamed and standardised to:
+With regards to data processing and cleaning, columns for the data set for were renamed to "gender", "age", and "vote_choice". Additionally, options for vote choice were then standardized to:
 
--   Gender
--   Age
--   Province
--   Education
--   Political Interest
--   Vote Certainty
--   Vote Choice
+-   "Liberal"
 
-Options for those columns are also standardized into the same format. For example, with the options for Gender renamed to "Male", "Female", or "Other"
+-   "Conservative"
 
-Standardization of data and columns names was done with assistance with Generative AI (Claude 3.5 Sonnet, <https://claude.ai/chat/81e69346-0b7c-448a-8e82-e8450b894d18>)
+-   "NDP"
+
+-   "Bloc Quebec"
+
+-   "Green Party"
+
+-   "People's Party"
+
+-   "Other"
+
+And options for gender were standardized to:
+
+-   "Male"
+
+-   "Female"
+
+-   "Other"
 
 ```{r, include = FALSE}
 # Cleaning Variable Data & Updating Labels
 ## Web Data
 web_data <- web_data %>%
   mutate(
-    province = case_when(
-      cps19_province == 14 ~ "Alberta",
-      cps19_province == 15 ~ "British Columbia",
-      cps19_province == 16 ~ "Manitoba",
-      cps19_province == 17 ~ "New Brunswick",
-      cps19_province == 18 ~ "Newfoundland & Labrador",
-      cps19_province == 19 ~ "Northwest Territories",
-      cps19_province == 20 ~ "Nova Scotia",
-      cps19_province == 21 ~ "Nunavut",
-      cps19_province == 22 ~ "Ontario",
-      cps19_province == 23 ~ "Prince Edward Island",
-      cps19_province == 24 ~ "Quebec",
-      cps19_province == 25 ~ "Saskatchewan",
-      cps19_province == 26 ~ "Yukon",
-      TRUE ~ NA_character_
-    ),
-    # Education standardization
-    education = case_when(
-      cps19_education == 1 ~ "No schooling",
-      cps19_education == 2 ~ "Some elementary school",
-      cps19_education == 3 ~ "Completed elementary school",
-      cps19_education == 4 ~ "Some secondary/high school",
-      cps19_education == 5 ~ "Completed secondary/high school",
-      cps19_education == 6 ~ "Some technical, community college",
-      cps19_education == 7 ~ "Completed technical, community college",
-      cps19_education == 8 ~ "Some university",
-      cps19_education == 9 ~ "Bachelor's degree",
-      cps19_education == 10 ~ "Master's degree",
-      cps19_education == 11 ~ "Professional degree or doctorate",
-      cps19_education == 12 ~ NA_character_,
-      TRUE ~ NA_character_
-    ),   
-    # Vote certainty standardization
-    vote_certainty = case_when(
-      cps19_v_likely == 1 ~ "Certain",
-      cps19_v_likely == 2 ~ "Likely",
-      cps19_v_likely == 3 ~ "Unlikely",
-      cps19_v_likely == 4 ~ "Certain to not vote",
-      cps19_v_likely == 5 ~ "Not eligible",
-      cps19_v_likely == 6 ~ NA_character_,
-      cps19_v_likely == 7 ~ "Voted in advance",
-      TRUE ~ NA_character_
-    ),
     # Age
     age = cps19_yob,
     # Gender
-    gender = cps19_gender,
+    # Gender - standardize from numeric codes to text
+    gender = case_when(
+      cps19_gender == 1 ~ "Male",
+      cps19_gender == 2 ~ "Female",
+      cps19_gender == 3 ~ "Other",
+      TRUE ~ NA_character_
+    ),
     # Vote choice standardization
     vote_choice = case_when(
       cps19_votechoice == 1 ~ "Liberal",
@@ -119,15 +92,18 @@ web_data <- web_data %>% rename(
 )
 ```
 
-# 
+Due to the nature of our study focusing on wider population trends, as well as the low response rate of individuals who reported "Other (Trans, Non-Binary, Two-Spirit, etc)", we are choosing to drop the "Other" category in gender during our analysis and are focusing on "Male" and "Female". The distribution of gender can be seen in the bar plot below:
 
-Be sure to have text describing any plots or tables included.
-
-```{r, echo = FALSE}
+```{r, echo = TRUE}
 
 # Use this to create your plots/visualization. 
-
-hist(phone_data$q3) 
+# Create a bar plot for gender distribution
+ggplot(web_data, aes(x = gender)) +
+  geom_bar(fill = "steelblue") +
+  labs(title = "Distribution of Gender in Web Survey Data",
+       x = "Gender",
+       y = "Count") +
+  theme_minimal()
 
 ```
 
