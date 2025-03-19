@@ -10,7 +10,7 @@ editor: visual
 
 # Here you can load in and clean the data (you may need to do the cleaning in a separate R script - this is up to you). 
 library(tidyverse)
-
+library(survey)
 phone_data <- read_csv("ces_phone.csv")
 web_data <- read_csv("ces_web.csv")
 
@@ -79,6 +79,16 @@ web_data <- web_data %>%
     )
   )
 
+# Remove missing values
+web_data <- na.omit(web_data)
+
+# Remove "other"
+web_data <- web_data %>%
+  filter(gender %in% c("Male", "Female"))  
+
+web_data <- web_data %>%
+  mutate(vote_liberal = if_else(vote_choice == "Liberal", 1, 0))
+
 
 # Cleaning Data & Renaming Columns
 web_data <- web_data %>% rename(
@@ -115,13 +125,7 @@ phone_data <- phone_data %>%
     ),
   )
 
-ggplot(phone_data, aes(x = gender)) +
-  geom_bar(fill = "steelblue") +
-  labs(title = "Distribution of Gender in Phone Survey Data",
-       x = "Gender",
-       y = "Count") +
-  theme_minimal()
-
+table(web_data$gender)
 ```
 
 # 3 Methods
@@ -173,6 +177,29 @@ In Table 1 I present both confidence intervals of....
 Provide a table or formula of the estimated logistic regression model, and include text describing this table/formula and the key takeaways. Interpret the estimates from the logistic regression model. Specifically, commenting on how the predictor variables relate to the outcome variable.
 
 Below is the estimate regression model....
+
+```{r}
+web_data <- web_data %>% 
+  mutate(pop_fpc = case_when(gender=="Male" ~ 16351400,         
+                             gender=="Female" ~ 16748600)) %>% 
+  # Total population size is 33,100,000
+  # Sampling weights (samp_wt) are calculated as Ni/ni
+  mutate(samp_wt = case_when(gender=="Male" ~ 16351400/15551,       
+                             gender=="Female" ~ 16748600/21980))
+
+
+strata.design <- svydesign(id=~1,
+                       strata=~gender,
+                       weights = ~samp_wt, 
+                       fpc=~pop_fpc,
+                       data=web_data)
+
+mysvyglm <- svyglm(vote_liberal ~ gender + age, 
+              family = "binomial", strata.design)
+
+summary(mysvyglm)
+```
+
 
 $$
 \hat{y} = 18x+3
