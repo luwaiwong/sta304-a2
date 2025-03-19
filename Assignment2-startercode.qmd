@@ -105,25 +105,40 @@ ggplot(web_data, aes(x = gender)) +
        y = "Count") +
   theme_minimal()
 
+phone_data <- phone_data %>%
+  mutate(
+    gender = case_when(
+      q3 == 1 ~ "Male",
+      q3 == 2 ~ "Female",
+      q3 == 3 ~ "Other",
+      TRUE ~ NA_character_
+    ),
+  )
+
+ggplot(phone_data, aes(x = gender)) +
+  geom_bar(fill = "steelblue") +
+  labs(title = "Distribution of Gender in Phone Survey Data",
+       x = "Gender",
+       y = "Count") +
+  theme_minimal()
+
 ```
 
 # 3 Methods
 
-Include the formula for calculating the confidence interval for proportions (do not include specific numbers yet) and provide a description of its components. Present the logistic regression model, specifying the independent variables and expected interpretation of coefficients (parameters, not estimates), and describe the model. In this section you are preparing the reader for how to interpret the numbers displayed in the next section (Results).
-
-Be sure to include your CI formula, and a description of the components of the formula. (somebody describe it)
+**TODO:** Include the formula for calculating the confidence interval for proportions (do not include specific numbers yet) and provide a description of its components. Be sure to include your CI formula, and a description of the components of the formula. (somebody do this)
 
 $$\bar{X} \pm \chi_{\alpha/2} \sqrt{\frac{1+1}{n}}$$
 
-Our logistic regression model for predicting the log odds of voting for the Liberal party is described mathematically as below:
+Our logistic regression model for predicting the log odds of voting for the Liberal party is described mathematically as below (**TODO REVIEW**):
 
 $$log(\frac{p}{1-p}) = \beta_0 + \beta_1 x_{male} + \beta_2x_{female} + \beta_3x_{age}$$
 
 Independent variables for the model are:
 
--   Male: Is 0 if the voter is not male, 1 if the voter is male. Describes the log odds of someone voting Liberal, if they are male
+-   Male: A categorical variable which is 0 if the voter is not male, 1 if the voter is male. Describes the log odds of someone voting Liberal, if they are male
 
--   Female: Is 0 if the voter is not female, 1 if the voter is female. Describes the log odds of someone voting Liberal, if they are female
+-   Female: A categorical variable which is 0 if the voter is not female, 1 if the voter is female. Describes the log odds of someone voting Liberal, if they are female
 
 -   Age: Describes the age of the voter. Describes the change in log odds of someone voting Liberal, as their age increases
 
@@ -140,7 +155,7 @@ Present a table showing the estimated proportion of votes for the selected party
 In Table 1 I present both confidence intervals of....
 
 |   | Proportion of Outcome Variable | 95% Confidence Interval of Outcome Variable |
-|------------------------|------------------------|------------------------|
+|----|----|----|
 | Phone Survey | 0.34 | (lower bound, upper bound) |
 | Web Survey | 0.25 | (lower bound, upper bound) |
 
