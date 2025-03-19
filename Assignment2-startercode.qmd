@@ -130,14 +130,14 @@ In this report, we employ two primary statistical approaches to investigate voti
 
 To estimate the proportion of individuals voting for the Liberal party, we calculate a 95% confidence interval for the proportion. The general formula for a confidence interval for a proportion is:
 
-$$\bar{X} \pm \chi_{\alpha/2} \sqrt{\frac{\hat X(1-\hat X)}{n}}$$
+$$\hat{p} \pm z_{\alpha/2} \cdot \sqrt{\frac{\hat p(1-\hat p)}{n}}$$
 
 Where:
 
 -   $\hat X$ is the sample proportion of individuals who voted for the Liberal party.
--   $\chi_{\alpha/2}$​ is the critical value from the standard normal distribution corresponding to the desired confidence level (for a 95% confidence interval, $\chi_{\alpha/2}=1.96$).
+-   $\pm z_{\alpha/2}$​ is the critical value from the standard normal distribution corresponding to the desired confidence level (for a 95% confidence interval, $\pm z_{\alpha/2}=1.96$).
 -   $n$ is the sample size of the survey respondents with valid vote choice data.
--   $\sqrt{\frac{\hat X(1-\hat X)}{n}}$ is the standard error of the proportion of individuals who voted for the Liberal party
+-   $\sqrt{\frac{\hat p(1-\hat p)}{n}}$ is the standard error of the proportion of individuals who voted for the Liberal party
 
 Our logistic regression model for predicting the log odds of voting for the Liberal party is described mathematically as below (**TODO REVIEW**):
 
@@ -163,10 +163,10 @@ Present a table showing the estimated proportion of votes for the selected party
 
 In Table 1 I present both confidence intervals of....
 
-|   | Proportion of Outcome Variable | 95% Confidence Interval of Outcome Variable |
+|              | Proportion of Outcome Variable | 95% Confidence Interval of Outcome Variable |
 |------------------------|------------------------|------------------------|
-| Phone Survey | 0.34 | (lower bound, upper bound) |
-| Web Survey | 0.25 | (lower bound, upper bound) |
+| Phone Survey | 0.34                           | (lower bound, upper bound)                  |
+| Web Survey   | 0.25                           | (lower bound, upper bound)                  |
 
 : The proportions and 95% confidence intervals of outcome variable of interest calculated for both the Canadian Election Study 2019 phone and web survey data.
 
