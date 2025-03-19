@@ -201,9 +201,7 @@ summary(mysvyglm)
 ```
 
 
-$$
-\hat{y} = 18x+3
-$$
+$$log\Big(\frac{\hat{p}}{1-\hat{p}}\Big) = -0.4133613 -0.0810955 x_{male} -0.0044845x_{age}$$
 
 # 5 Discussion
 
