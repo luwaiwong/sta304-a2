@@ -7,7 +7,6 @@ editor: visual
 ---
 
 ```{r, include = FALSE}
-
 # Here you can load in and clean the data (you may need to do the cleaning in a separate R script - this is up to you). 
 library(tidyverse)
 
@@ -128,7 +127,7 @@ ggplot(phone_data, aes(x = gender)) +
 
 In this report, we employ two primary statistical approaches to investigate voting behavior in the 2019 Canadian Federal Election Study web survey data: confidence intervals for proportions and logistic regression modeling. These methods allow us to estimate the proportion of voters supporting the Liberal party and to predict the log odds of voting for the Liberal party based on gender and age.
 
-To estimate the proportion of individuals voting for the Liberal party, we calculate a 95% confidence interval for the proportion. The general formula for a confidence interval for a proportion is:
+To estimate the proportion of individuals voting for the Liberal party, we calculate a 95% confidence interval for the proportion. The general formula for a confidence interval for a proportion is:(UPDATE! NEED CONFIRM)
 
 $$\hat{p} \pm z_{\alpha/2} \cdot \sqrt{\frac{\hat p(1-\hat p)}{n}}$$
 
