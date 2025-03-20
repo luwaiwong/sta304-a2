@@ -9,7 +9,7 @@ editor: visual
 ```{r, include = FALSE}
 # Here you can load in and clean the data (you may need to do the cleaning in a separate R script - this is up to you). 
 library(tidyverse)
-
+library(survey)
 phone_data <- read_csv("ces_phone.csv")
 web_data <- read_csv("ces_web.csv")
 
@@ -78,6 +78,16 @@ web_data <- web_data %>%
     )
   )
 
+# Remove missing values
+web_data <- na.omit(web_data)
+
+# Remove "other"
+web_data <- web_data %>%
+  filter(gender %in% c("Male", "Female"))  
+
+web_data <- web_data %>%
+  mutate(vote_liberal = if_else(vote_choice == "Liberal", 1, 0))
+
 
 # Cleaning Data & Renaming Columns
 web_data <- web_data %>% rename(
@@ -128,13 +138,6 @@ phone_data <- phone_data %>%
       TRUE ~ NA_character_
     ),
   )
-
-ggplot(phone_data, aes(x = gender)) +
-  geom_bar(fill = "steelblue") +
-  labs(title = "Distribution of Gender in Phone Survey Data",
-       x = "Gender",
-       y = "Count") +
-  theme_minimal()
 
 table(web_data$gender)
 ```
@@ -221,17 +224,11 @@ strata.design <- svydesign(id=~1,
                        data=web_data)
 
 mysvyglm <- svyglm(vote_liberal ~ gender + age, 
-              family = "quasibinomial", strata.design)
+              family = "binomial", strata.design)
 
 summary(mysvyglm)
-
 ```
 
-```{r}
-#install.packages("survey")
-library(survey)
-
-```
 
 $$log\Big(\frac{\hat{p}}{1-\hat{p}}\Big) = -0.4133613 -0.0810955 x_{male} -0.0044845x_{age}$$
 
