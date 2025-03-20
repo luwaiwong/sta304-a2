@@ -7,6 +7,7 @@ editor: visual
 ---
 
 ```{r, include = FALSE}
+install.packages("survey")
 # Here you can load in and clean the data (you may need to do the cleaning in a separate R script - this is up to you). 
 library(tidyverse)
 library(survey)
@@ -109,12 +110,6 @@ web_data <- web_data %>%
 web_data <- web_data %>%
   mutate(vote_liberal = as.integer(vote_choice == "Liberal"))
 
-phone_data <- phone_data %>%
-  filter(gender %in% c("Male", "Female")) 
-
-phone_data <- phone_data %>%
-  mutate(vote_liberal = as.integer(vote_choice == "Liberal"))
-
 ```
 
 Due to the nature of our study focusing on wider population trends, as well as the low response rate of individuals who reported "Other (Trans, Non-Binary, Two-Spirit, etc)", we are choosing to drop the "Other" category in gender during our analysis and are focusing on "Male" and "Female". The distribution of gender can be seen in the bar plot below:
@@ -142,12 +137,11 @@ phone_data <- phone_data %>%
 table(web_data$gender)
 ```
 
-
 # 3 Methods
 
 In this report, we employ two primary statistical approaches to investigate voting behavior in the 2019 Canadian Federal Election Study web survey data: confidence intervals for proportions and logistic regression modeling. These methods allow us to estimate the proportion of voters supporting the Liberal party and to predict the log odds of voting for the Liberal party based on gender and age.
 
-To estimate the proportion of individuals voting for the Liberal party, we calculate a 95% confidence interval for the proportion. The general formula for a confidence interval for a proportion is:(UPDATE! NEED CONFIRM)
+To estimate the proportion of individuals voting for the Liberal party, we calculate a 95% confidence interval for the proportion. The general formula for a confidence interval for a proportion is:
 
 $$
 \hat{p} \pm z_{\alpha/2} \sqrt{\sum_{h=1}^H W_h^2 \left(1 - \frac{n_h}{N_h}\right) \frac{\hat{p}_h (1 - \hat{p}_h)}{n_h}}
@@ -155,23 +149,34 @@ $$
 
 Where:
 
-- $\hat p$ is the sample proportion of individuals who voted for the Liberal party.
-- $\pm z_{\alpha/2}$​ is the critical value from the standard normal distribution corresponding to the desired confidence level (for a 95% confidence interval, $\pm z_{\alpha/2}=1.96$).
-- $n$ is the sample size of the survey respondents with valid vote choice data.
-- $W_h=\frac{N_h}{N}$ represents the proportion of the population in stratum h (based on gender) 
-- $
+-   $\hat p$ is the sample proportion of individuals who voted for the Liberal party.
+-   $z_{\alpha/2}$​ is the critical value from the standard normal distribution corresponding to the desired confidence level (for a 95% confidence interval, $\pm z_{\alpha/2}=1.96$).
+-   $n_h$ represents the sample size of survey respondents with valid vote choice data in stratum $h$
+-   $W_h=\frac{N_h}{N}$ represents the proportion of the population in stratum $h$ (based on gender)
+-   $\hat p_h$ is the sample proportion of liberal voters in stratum $h$
+-   The term $\left(1 - \frac{n_h}{N_h}\right)$ serves as a finite population correction (FPC), which adjusts for potential overestimation of variance when the sample is a large fraction of the population.
 
-Our logistic regression model for predicting the log odds of voting for the Liberal party is described mathematically as below (**TODO REVIEW**):
+To explore voting behaviours, we use a logistic regression model for predicting the log odds of voting for the Liberal party, described mathematically as below :
 
-$$log(\frac{p}{1-p}) = \beta_0 + \beta_1 x_{male} + \beta_2x_{female} + \beta_3x_{age}$$
+$$log(\frac{p}{1-p}) = \beta_0 + \beta_1 x_{male} + \beta_2x_{age}$$
+
+Where
+
+-   $p$ is probability of voting for the liberal party
+
+-   $\beta_0$​ is the intercept, representing the baseline log odds of voting Liberal when all predictors are zero.
+
+-   $\beta_1$ captures the change in log odds of voting Liberal for males relative to the reference category (not male)
+
+-   $\beta_2$​ represents the change in log odds of voting Liberal for each additional year of age.
 
 Independent variables for the model are:
 
--   Male: A categorical variable which is 0 if the voter is not male, 1 if the voter is male. Describes the log odds of someone voting Liberal, if they are male
-
--   Female: A categorical variable which is 0 if the voter is not female, 1 if the voter is female. Describes the log odds of someone voting Liberal, if they are female
+-   Male: A categorical variable which is 0 if the voter is not male (i.e, female), 1 if the voter is male. Describes the log odds of someone voting Liberal, if they are male
 
 -   Age: Describes the age of the voter. Describes the change in log odds of someone voting Liberal, as their age increases
+
+Given the logistic regression model’s interpretation, getting the exponents of the coefficients yields the odds ratios, which quantify how gender and age influence the likelihood of supporting the Liberal Party. An odds ratio greater than 1 for $\beta_1$​ suggests that males are more likely to vote Liberal than non-males, while an odds ratio less than 1 indicates the opposite. Similarly, the odds ratio for $\beta_2$ reveals whether older voters are more or less inclined to support the Liberal Party.
 
 # 4 Results
 
@@ -196,10 +201,10 @@ phone_liberal_ci <- confint(phone_liberal_proportion)
 
 In Table 1 I present both confidence intervals of....
 
-|              | Proportion of Outcome Variable | 95% Confidence Interval of Outcome Variable |
-|-------------------|-----------------------|-------------------------------|
-| Phone Survey | 0.34                           | (lower bound, upper bound)                  |
-| Web Survey   | 0.25                           | (lower bound, upper bound)                  |
+|   | Proportion of Outcome Variable | 95% Confidence Interval of Outcome Variable |
+|-------------------|-----------------------|------------------------------|
+| Phone Survey | 0.34 | (lower bound, upper bound) |
+| Web Survey | 0.25 | (lower bound, upper bound) |
 
 : The proportions and 95% confidence intervals of outcome variable of interest calculated for both the Canadian Election Study 2019 phone and web survey data.
 
@@ -228,7 +233,6 @@ mysvyglm <- svyglm(vote_liberal ~ gender + age,
 
 summary(mysvyglm)
 ```
-
 
 $$log\Big(\frac{\hat{p}}{1-\hat{p}}\Big) = -0.4133613 -0.0810955 x_{male} -0.0044845x_{age}$$
 
