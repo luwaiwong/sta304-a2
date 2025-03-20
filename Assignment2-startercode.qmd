@@ -85,16 +85,31 @@ web_data <- web_data %>% rename(
 #  age = cps19_yob,
 #  provnice = cps19_province,
 #  education = cps19_education,
-  interest = cps19_interest_elxn_1,    
+#  interest = cps19_interest_elxn,    
 #  vote_certainty = cps19_v_likely,
 #  vote_choice = cps19_votechoice
 )
+# Remove missing values
+web_data <- na.omit(web_data)
+
+# Remove "other"
+web_data <- web_data %>%
+  filter(gender %in% c("Male", "Female"))  
+
+web_data <- web_data %>%
+  mutate(vote_liberal = as.integer(vote_choice == "Liberal"))
+
+phone_data <- phone_data %>%
+  filter(gender %in% c("Male", "Female")) 
+
+phone_data <- phone_data %>%
+  mutate(vote_liberal = as.integer(vote_choice == "Liberal"))
+
 ```
 
 Due to the nature of our study focusing on wider population trends, as well as the low response rate of individuals who reported "Other (Trans, Non-Binary, Two-Spirit, etc)", we are choosing to drop the "Other" category in gender during our analysis and are focusing on "Male" and "Female". The distribution of gender can be seen in the bar plot below:
 
 ```{r, echo = TRUE}
-
 # Use this to create your plots/visualization. 
 # Create a bar plot for gender distribution
 ggplot(web_data, aes(x = gender)) +
@@ -121,7 +136,9 @@ ggplot(phone_data, aes(x = gender)) +
        y = "Count") +
   theme_minimal()
 
+table(web_data$gender)
 ```
+
 
 # 3 Methods
 
@@ -129,14 +146,17 @@ In this report, we employ two primary statistical approaches to investigate voti
 
 To estimate the proportion of individuals voting for the Liberal party, we calculate a 95% confidence interval for the proportion. The general formula for a confidence interval for a proportion is:(UPDATE! NEED CONFIRM)
 
-$$\hat{p} \pm z_{\alpha/2} \cdot \sqrt{\frac{\hat p(1-\hat p)}{n}}$$
+$$
+\hat{p} \pm z_{\alpha/2} \sqrt{\sum_{h=1}^H W_h^2 \left(1 - \frac{n_h}{N_h}\right) \frac{\hat{p}_h (1 - \hat{p}_h)}{n_h}}
+$$
 
 Where:
 
--   $\hat X$ is the sample proportion of individuals who voted for the Liberal party.
--   $\pm z_{\alpha/2}$​ is the critical value from the standard normal distribution corresponding to the desired confidence level (for a 95% confidence interval, $\pm z_{\alpha/2}=1.96$).
--   $n$ is the sample size of the survey respondents with valid vote choice data.
--   $\sqrt{\frac{\hat p(1-\hat p)}{n}}$ is the standard error of the proportion of individuals who voted for the Liberal party
+- $\hat p$ is the sample proportion of individuals who voted for the Liberal party.
+- $\pm z_{\alpha/2}$​ is the critical value from the standard normal distribution corresponding to the desired confidence level (for a 95% confidence interval, $\pm z_{\alpha/2}=1.96$).
+- $n$ is the sample size of the survey respondents with valid vote choice data.
+- $W_h=\frac{N_h}{N}$ represents the proportion of the population in stratum h (based on gender) 
+- $
 
 Our logistic regression model for predicting the log odds of voting for the Liberal party is described mathematically as below (**TODO REVIEW**):
 
@@ -155,15 +175,26 @@ Independent variables for the model are:
 Present a table showing the estimated proportion of votes for the selected party along with the 95% confidence interval, and include text describing this table and the key takeaways.
 
 ```{r, include = FALSE}
+# Setting up the survey design for the web data
+web_svy <- svydesign(ids = ~1, strata = ~gender, weights = ~samp_wt, data = web_data)
 
-# Here you can run code to calculate your Confidence Intervals.
+# Setting up the survey design for the phone data
+phone_svy <- svydesign(ids = ~1, strata = ~gender, weights = ~phone_samp_wt, data = phone_data)
+
+# Web survey proportion and CI
+web_liberal_proportion <- svymean(~vote_liberal, web_svy)
+web_liberal_ci <- confint(web_liberal_proportion)
+
+# Phone survey proportion and CI
+phone_liberal_proportion <- svymean(~vote_liberal, phone_svy)
+phone_liberal_ci <- confint(phone_liberal_proportion)
 
 ```
 
 In Table 1 I present both confidence intervals of....
 
 |              | Proportion of Outcome Variable | 95% Confidence Interval of Outcome Variable |
-|------------------------|------------------------|------------------------|
+|-------------------|-----------------------|-------------------------------|
 | Phone Survey | 0.34                           | (lower bound, upper bound)                  |
 | Web Survey   | 0.25                           | (lower bound, upper bound)                  |
 
@@ -173,9 +204,36 @@ Provide a table or formula of the estimated logistic regression model, and inclu
 
 Below is the estimate regression model....
 
-$$
-\hat{y} = 18x+3
-$$
+```{r}
+web_data <- web_data %>% 
+  mutate(pop_fpc = case_when(gender=="Male" ~ 16351400,         
+                             gender=="Female" ~ 16748600)) %>% 
+  # Total population size is 33,100,000
+  # Sampling weights (samp_wt) are calculated as Ni/ni
+  mutate(samp_wt = case_when(gender=="Male" ~ 16351400/15551,       
+                             gender=="Female" ~ 16748600/21980))
+
+
+strata.design <- svydesign(id=~1,
+                       strata=~gender,
+                       weights = ~samp_wt, 
+                       fpc=~pop_fpc,
+                       data=web_data)
+
+mysvyglm <- svyglm(vote_liberal ~ gender + age, 
+              family = "quasibinomial", strata.design)
+
+summary(mysvyglm)
+
+```
+
+```{r}
+#install.packages("survey")
+library(survey)
+
+```
+
+$$log\Big(\frac{\hat{p}}{1-\hat{p}}\Big) = -0.4133613 -0.0810955 x_{male} -0.0044845x_{age}$$
 
 # 5 Discussion
 
